@@ -22,7 +22,8 @@ export class CallbackComponent implements OnInit {
       const body = new URLSearchParams();
       body.set("grant_type", "authorization_code");
       body.set("code", this.route.snapshot.queryParamMap.get("code"));
-      body.set("redirect_uri", "http://localhost:4201/callback");
+      // body.set("redirect_uri", "http://localhost:4201/callback");
+      body.set("redirect_uri", "https://yly.herokuapp.com/callback");
       body.set("client_id", "ada1330ff00d4be89eea2dc8e7315186");
       body.set("client_secret", "7ce2de80dd4e40e3af3ca79d85d53b83");
 
