@@ -73,6 +73,14 @@ export class PlayComponent implements OnInit {
     this.router.navigate(["/"]);
   }
 
+  logout() {
+    this.http
+      .put(this.apiUrl + "/player/pause", {}, { headers: this.headers })
+      .pipe()
+      .subscribe(_ => {}, this.err.bind(this));
+    this.router.navigate(["/"]);
+  }
+
   search(value) {
     this.searchResults.splice(0);
     if (value) {

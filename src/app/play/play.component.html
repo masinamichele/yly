@@ -1,11 +1,11 @@
-<div *ngIf="userData; else loading">
+<div *ngIf="userData">
   <div class="splitscreen">
     <div class="player_area flex_column">
       <div class="user_card">
         <img [src]="userData.images[0].url">
         <div>Welcome, <div>{{userData.display_name}}</div>
         </div>
-        <a routerLink="/">(logout)</a>
+        <a (click)="logout()">(logout)</a>
       </div>
 
       <div class="tab">
@@ -82,10 +82,6 @@
   </div>
 
 </div>
-
-<ng-template #loading>
-  <div>Retrieving data from Spotify...</div>
-</ng-template>
 
 <button (click)="updateCurrent()" id="helper" style="visibility:hidden;position:absolute;top:0"></button>
 <button (click)="updateDeviceID()" id="deviceid" style="visibility:hidden;position:absolute;top:0"></button>
