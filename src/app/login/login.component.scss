@@ -18,6 +18,27 @@ $green: #2ecc71;
   flex-direction: column;
 }
 
+.disclaimer {
+  color: $grey;
+  font-size: 15px;
+  margin: 24px;
+  font-weight: 300;
+  div {
+    text-align: center;
+  }
+  div.github {
+    margin-top: 48px;
+  }
+}
+
+a,
+a:link,
+a:hover,
+a:visited {
+  color: $grey;
+  font-weight: 400;
+}
+
 .logo {
   font-size: 50px;
   font-weight: 300;
