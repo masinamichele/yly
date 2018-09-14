@@ -23,7 +23,6 @@
           </span>
         </div>
 
-
       </div>
 
       <div class="center_box">
@@ -34,10 +33,14 @@
         </div>
         <div class="track_row">
           <ng-container *ngIf="nextLibrary; else noMore">
-            <a (click)="loadMore()">Load more...</a>
+            <button mat-icon-button style="visibility:hidden;">
+              <mat-icon>play_arrow</mat-icon>
+            </button> <a (click)="loadMore()">Load more...</a>
           </ng-container>
           <ng-template #noMore>
-            End of list.
+            <button mat-icon-button style="visibility:hidden;">
+              <mat-icon>play_arrow</mat-icon>
+            </button> End of list.
           </ng-template>
         </div>
       </div>
@@ -83,3 +86,13 @@
 <ng-template #loading>
   <div>Retrieving data from Spotify...</div>
 </ng-template>
+
+<button (click)="updateCurrent()" id="helper" style="visibility:hidden;position:absolute;top:0"></button>
+<button (click)="updateDeviceID()" id="deviceid" style="visibility:hidden;position:absolute;top:0"></button>
+
+<div class="overlay" *ngIf="!device">
+  <div class="overlay_content">
+    <mat-icon class="rotate-center" [inline]="true">autorenew</mat-icon>
+    <div>Please wait...</div>
+  </div>
+</div>

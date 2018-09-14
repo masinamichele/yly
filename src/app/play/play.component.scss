@@ -184,3 +184,39 @@ a {
     }
   }
 }
+
+.overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background-color: #00000099;
+  div.overlay_content {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    mat-icon {
+      font-size: 45px;
+      margin: auto;
+      color: $green;
+    }
+    div {
+      color: $white;
+      font-weight: 300;
+    }
+  }
+}
+
+.rotate-center {
+  animation: rotate-center 1s ease-in-out infinite both;
+}
+@keyframes rotate-center {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

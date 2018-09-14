@@ -1,10 +1,13 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { PlaylistsComponent } from "../playlists/playlists.component";
 import { FormControl } from "@angular/forms";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+
+import "./spotify-player.js";
+import "./spotify.js";
 
 @Component({
   selector: "app-play",
@@ -26,6 +29,7 @@ export class PlayComponent implements OnInit {
   lyrics;
   playlists = [];
   nextLibrary;
+  device;
 
   searchBox = new FormControl();
   searchResults = [];
@@ -39,6 +43,10 @@ export class PlayComponent implements OnInit {
     this.headers = {
       Authorization: `Bearer ${this.token}`
     };
+  }
+
+  updateDeviceID() {
+    this.device = localStorage.getItem("device");
   }
 
   ngOnInit() {
@@ -108,9 +116,10 @@ export class PlayComponent implements OnInit {
   }
 
   playTrack(track) {
+    console.log(this.apiUrl + "/player/play?device_id=" + this.device);
     this.http
       .put(
-        this.apiUrl + "/player/play",
+        this.apiUrl + "/player/play?device_id=" + this.device,
         { uris: [track.uri] },
         { headers: this.headers }
       )
@@ -125,7 +134,7 @@ export class PlayComponent implements OnInit {
   playPlaylist(list) {
     this.http
       .put(
-        this.apiUrl + "/player/play",
+        this.apiUrl + "/player/play?device_id=" + this.device,
         { context_uri: list.uri },
         { headers: this.headers }
       )
@@ -250,28 +259,30 @@ export class PlayComponent implements OnInit {
         .pipe()
         .subscribe(data => {
           console.log(data);
-          const currentTitle = data["item"].name;
-          const currentArtists = data["item"].artists
-            .map(e => e.name)
-            .join(", ");
+          if (data) {
+            const currentTitle = data["item"].name;
+            const currentArtists = data["item"].artists
+              .map(e => e.name)
+              .join(", ");
 
-          if (this.currentTrack !== currentTitle + " - " + currentArtists) {
-            this.loadLyrics(currentTitle, currentArtists);
+            if (this.currentTrack !== currentTitle + " - " + currentArtists) {
+              this.loadLyrics(currentTitle, currentArtists);
+            }
+
+            this.currentTrack = currentTitle + " - " + currentArtists;
+            this.currentUrl = data["item"].external_urls.spotify;
+            this.isPlaying = data["is_playing"];
+            this.currentId = data["item"].id;
+
+            this.http
+              .get(this.apiUrl + "/tracks/contains?ids=" + this.currentId, {
+                headers: this.headers
+              })
+              .pipe()
+              .subscribe(hasTrack => {
+                this.hasSavedTrack = hasTrack[0];
+              }, this.err.bind(this));
           }
-
-          this.currentTrack = currentTitle + " - " + currentArtists;
-          this.currentUrl = data["item"].external_urls.spotify;
-          this.isPlaying = data["is_playing"];
-          this.currentId = data["item"].id;
-
-          this.http
-            .get(this.apiUrl + "/tracks/contains?ids=" + this.currentId, {
-              headers: this.headers
-            })
-            .pipe()
-            .subscribe(hasTrack => {
-              this.hasSavedTrack = hasTrack[0];
-            }, this.err.bind(this));
         }, this.err.bind(this));
     }, 1000);
   }
@@ -281,7 +292,7 @@ export class PlayComponent implements OnInit {
     const query = encodeURI(
       title
         .toLowerCase()
-        .replace(/|-|\d{4}|remaster(ed)?|(single)?\s*version|\(.+?\)/g, "") +
+        .replace(/,|-|\d{4}|remaster(ed)?|(single)?\s*version|\(.+?\)/g, "") +
         " " +
         artists
           .toLowerCase()

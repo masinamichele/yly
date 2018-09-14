@@ -8,7 +8,7 @@ import { Component, OnInit } from "@angular/core";
 export class LoginComponent implements OnInit {
   clientId = "ada1330ff00d4be89eea2dc8e7315186";
   responseType = "token";
-  redirectUri = window.location.origin + '/callback';
+  redirectUri = window.location.origin + "/callback";
   scope = [
     "user-read-private",
     "user-read-email",
@@ -16,17 +16,20 @@ export class LoginComponent implements OnInit {
     "user-read-playback-state",
     "user-library-read",
     "user-library-modify",
-    "playlist-read-private"
+    "playlist-read-private",
+    "streaming",
+    "user-read-birthdate"
   ];
   state = "qwerty123";
   authUrl = `https://accounts.spotify.com/authorize/?client_id=${
     this.clientId
-  }&response_type=${this.responseType}&redirect_uri=${
-    encodeURIComponent(this.redirectUri)
-  }&scope=${this.scope.join("%20")}&state=${this.state}`;
+  }&response_type=${this.responseType}&redirect_uri=${encodeURIComponent(
+    this.redirectUri
+  )}&scope=${this.scope.join("%20")}&state=${this.state}`;
 
   ngOnInit() {
     localStorage.removeItem("token");
+    localStorage.removeItem("device");
   }
 
   login() {
