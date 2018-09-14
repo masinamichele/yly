@@ -1,6 +1,6 @@
 {
-  "name": "yly",
-  "version": "0.0.0",
+  "name": "spotifylyrics",
+  "version": "0.5.0",
   "scripts": {
     "ng": "ng",
     "start": "node server.js",

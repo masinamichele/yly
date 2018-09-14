@@ -1,0 +1,8 @@
+<mat-list>
+  <mat-list-item *ngFor="let list of playlists" (click)="closeDialog(list)">
+    <div class="list_row">
+      <div class="title">{{list.name}}</div>
+      <div class="sub">{{list.length}} tracks - by {{list.owner}}</div>
+    </div>
+  </mat-list-item>
+</mat-list>

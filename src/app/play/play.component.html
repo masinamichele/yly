@@ -1,0 +1,85 @@
+<div *ngIf="userData; else loading">
+  <div class="splitscreen">
+    <div class="player_area flex_column">
+      <div class="user_card">
+        <img [src]="userData.images[0].url">
+        <div>Welcome, <div>{{userData.display_name}}</div>
+        </div>
+        <a routerLink="/">(logout)</a>
+      </div>
+
+      <div class="tab">
+        Your library
+        <div class="searchbox">
+          <input placeholder="Search..." [formControl]="searchBox">
+          <div class="search_results" *ngIf="searchResults.length > 0">
+            <div *ngFor="let r of searchResults" class="result" (click)="playTrack(r)">
+              <div class="title">{{r.title}}</div>
+              <div class="artist">{{r.artists}}</div>
+            </div>
+          </div>
+          <span>
+            <mat-icon>search</mat-icon>
+          </span>
+        </div>
+
+
+      </div>
+
+      <div class="center_box">
+        <div *ngFor="let track of playlist" class="track_row">
+          <button mat-icon-button (click)="playTrack(track)">
+            <mat-icon>play_arrow</mat-icon>
+          </button> {{track.title}} - {{track.artist}}
+        </div>
+        <div class="track_row">
+          <ng-container *ngIf="nextLibrary; else noMore">
+            <a (click)="loadMore()">Load more...</a>
+          </ng-container>
+          <ng-template #noMore>
+            End of list.
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="player">
+        <div class="current"><a [href]="currentUrl" target="_blank">{{currentTrack}}</a></div>
+        <div class="buttons">
+          <button mat-mini-fab (click)="toggleSave()" [matTooltip]="hasSavedTrack ? 'Remove from library' : 'Add to library'"
+            matTooltipPosition="before">
+            <mat-icon>{{hasSavedTrack ? 'check' : 'add'}}</mat-icon>
+          </button>
+          <button mat-mini-fab (click)="skipPrevious()">
+            <mat-icon>skip_previous</mat-icon>
+          </button>
+          <button mat-fab (click)="playPause()">
+            <mat-icon>{{isPlaying ? 'pause' : 'play_arrow'}}</mat-icon>
+          </button>
+          <button mat-mini-fab (click)="skipNext()">
+            <mat-icon>skip_next</mat-icon>
+          </button>
+          <button mat-mini-fab (click)="refresh()" matTooltip="Refresh" matTooltipPosition="after">
+            <mat-icon>autorenew</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lyrics_area">
+      <div class="lyrics" [innerHtml]="lyrics">
+      </div>
+    </div>
+  </div>
+
+  <div class="abs">
+    <button mat-flat-button matTooltip="Open playlists" matTooltipPosition="above" [matBadge]="playlists.length"
+      matBadgeColor="accent" (click)="openPlaylists()">
+      <mat-icon>playlist_play</mat-icon>
+    </button>
+  </div>
+
+</div>
+
+<ng-template #loading>
+  <div>Retrieving data from Spotify...</div>
+</ng-template>

@@ -1,22 +1,33 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 
 @Component({
   selector: "app-login",
   templateUrl: "./login.component.html",
-  styleUrls: ["./login.component.css"]
+  styleUrls: ["./login.component.scss"]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   clientId = "ada1330ff00d4be89eea2dc8e7315186";
-  responseType = "code";
-  // redirectUri = "http%3A%2F%2Flocalhost%3A4201%2Fcallback";
-  redirectUri = "https%3A%2F%2Fyly.herokuapp.com%2Fcallback";
-  scope = "user-read-private%20user-read-email";
+  responseType = "token";
+  redirectUri = window.location.origin + '/callback';
+  scope = [
+    "user-read-private",
+    "user-read-email",
+    "user-modify-playback-state",
+    "user-read-playback-state",
+    "user-library-read",
+    "user-library-modify",
+    "playlist-read-private"
+  ];
   state = "qwerty123";
   authUrl = `https://accounts.spotify.com/authorize/?client_id=${
     this.clientId
-  }&response_type=${this.responseType}&redirect_uri=${this.redirectUri}&scope=${
-    this.scope
-  }&state=${this.state}`;
+  }&response_type=${this.responseType}&redirect_uri=${
+    encodeURIComponent(this.redirectUri)
+  }&scope=${this.scope.join("%20")}&state=${this.state}`;
+
+  ngOnInit() {
+    localStorage.removeItem("token");
+  }
 
   login() {
     window.location.href = this.authUrl;

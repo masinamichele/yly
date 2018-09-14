@@ -1,0 +1,12 @@
+.sub {
+  font-weight: 300;
+  font-size: 13px;
+}
+
+mat-list-item {
+  cursor: pointer;
+  &:hover {
+    background-color: #eee;
+    // color: #454545;
+  }
+}
