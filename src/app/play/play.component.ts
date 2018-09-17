@@ -1,10 +1,14 @@
+import { PremiumDialogComponent } from "./../premium-dialog/premium-dialog.component";
 import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { PlaylistsComponent } from "../playlists/playlists.component";
+import { QueueComponent } from "../queue/queue.component";
+
 import { FormControl } from "@angular/forms";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { MatDialog } from "@angular/material";
 
 import "./spotify-player.js";
 import "./spotify.js";
@@ -26,18 +30,23 @@ export class PlayComponent implements OnInit {
   playlist = [];
   hasSavedTrack: boolean;
   isPlaying: boolean;
-  lyrics;
+  lyrics = "Play any song, the lyrics will be displayed here.";
   playlists = [];
   nextLibrary;
   device;
 
+  queue = [];
+
   searchBox = new FormControl();
   searchResults = [];
+
+  volumeSlider = new FormControl();
 
   constructor(
     private router: Router,
     private http: HttpClient,
-    private bottomSheet: MatBottomSheet
+    private bottomSheet: MatBottomSheet,
+    private dialog: MatDialog
   ) {
     this.token = localStorage.getItem("token");
     this.headers = {
@@ -55,10 +64,17 @@ export class PlayComponent implements OnInit {
       .pipe()
       .subscribe(data => {
         this.userData = data;
+        if (this.userData.product !== "premium") {
+          this.dialog.open(PremiumDialogComponent, {
+            disableClose: true
+          });
+        }
         this.loadPlaylist();
         this.getPlaylists();
         this.updateCurrent();
       }, this.err.bind(this));
+
+    this.getVolume();
 
     this.searchBox.valueChanges
       .pipe(
@@ -66,11 +82,18 @@ export class PlayComponent implements OnInit {
         distinctUntilChanged()
       )
       .subscribe(this.search.bind(this));
+
+    this.volumeSlider.valueChanges
+      .pipe(
+        debounceTime(200),
+        distinctUntilChanged()
+      )
+      .subscribe(this.setVolume.bind(this));
   }
 
   err(error) {
     console.error(error);
-    this.router.navigate(["/"]);
+    this.logout();
   }
 
   logout() {
@@ -85,7 +108,7 @@ export class PlayComponent implements OnInit {
     this.searchResults.splice(0);
     if (value) {
       this.http
-        .get(this.baseApiUrl + "/search?type=track&limit=5&q=" + value, {
+        .get(this.baseApiUrl + "/search?type=track&limit=20&q=" + value, {
           headers: this.headers
         })
         .pipe()
@@ -98,6 +121,38 @@ export class PlayComponent implements OnInit {
               uri: track.uri
             });
           }
+        }, this.err.bind(this));
+    }
+  }
+
+  getVolume() {
+    this.http
+      .get(this.apiUrl + "/player", { headers: this.headers })
+      .pipe()
+      .subscribe(data => {
+        if (data) {
+          this.volumeSlider.setValue(data["device"].volume_percent);
+        }
+      });
+  }
+
+  setVolume(value) {
+    if (value) {
+      this.http
+        .put(
+          this.apiUrl +
+            "/player/volume?device_id=" +
+            this.device +
+            "&volume_percent=" +
+            value,
+          {},
+          {
+            headers: this.headers
+          }
+        )
+        .pipe()
+        .subscribe(_ => {
+          this.volumeSlider.setValue(value);
         }, this.err.bind(this));
     }
   }
@@ -152,6 +207,19 @@ export class PlayComponent implements OnInit {
       }, this.err.bind(this));
   }
 
+  handleQueue(track) {
+    const index = this.queue.indexOf(track);
+    if (index === -1) {
+      this.queue.push(track);
+    } else {
+      this.queue.splice(index, 1);
+    }
+  }
+
+  isQueued(track) {
+    return this.queue.indexOf(track) > -1;
+  }
+
   openPlaylists() {
     const sheetRef = this.bottomSheet.open(PlaylistsComponent, {
       data: this.playlists
@@ -160,6 +228,19 @@ export class PlayComponent implements OnInit {
     sheetRef.afterDismissed().subscribe(data => {
       if (data) {
         this.playPlaylist(data);
+      }
+    });
+  }
+
+  openQueue() {
+    const sheetRef = this.bottomSheet.open(QueueComponent, {
+      data: this.queue
+    });
+
+    sheetRef.afterDismissed().subscribe(data => {
+      if (data) {
+        this.playTrack(data);
+        this.queue.splice(this.queue.indexOf(data), 1);
       }
     });
   }
@@ -202,6 +283,11 @@ export class PlayComponent implements OnInit {
   }
 
   skipNext() {
+    if (this.queue.length > 0) {
+      this.handleNextTrack();
+      return;
+    }
+
     this.http
       .post(this.apiUrl + "/player/next", {}, { headers: this.headers })
       .pipe()
@@ -258,6 +344,15 @@ export class PlayComponent implements OnInit {
     }
   }
 
+  handleNextTrack() {
+    if (this.queue.length > 0) {
+      const next = this.queue.shift();
+      this.playTrack(next);
+      return;
+    }
+    this.updateCurrent();
+  }
+
   updateCurrent() {
     setTimeout(() => {
       this.http
@@ -290,9 +385,11 @@ export class PlayComponent implements OnInit {
               .subscribe(hasTrack => {
                 this.hasSavedTrack = hasTrack[0];
               }, this.err.bind(this));
+
+            this.getVolume();
           }
         }, this.err.bind(this));
-    }, 1000);
+    }, 500);
   }
 
   loadLyrics(title: string, artists: string) {
@@ -333,6 +430,8 @@ export class PlayComponent implements OnInit {
               almostLyrics = almostLyrics.replace(/<p>|<a.+?>|<\/a>/gm, "");
 
               this.lyrics = almostLyrics;
+              // this.lyrics +=
+              //   "<br><br>Lyrics by <a href='https://genius.com/' target='_blank'>Genius</a><br>";
             })
             .catch(err => {
               this.lyrics = "Error loading lyrics.";

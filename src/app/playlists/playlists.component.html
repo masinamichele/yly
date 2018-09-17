@@ -1,8 +1,14 @@
 <mat-list>
-  <mat-list-item *ngFor="let list of playlists" (click)="closeDialog(list)">
-    <div class="list_row">
-      <div class="title">{{list.name}}</div>
-      <div class="sub">{{list.length}} tracks - by {{list.owner}}</div>
-    </div>
-  </mat-list-item>
+  <ng-container *ngIf="playlists.length < 1; else someLists">
+    <div>No playlists.</div>
+  </ng-container>
+
+  <ng-template #someLists>
+    <mat-list-item *ngFor="let list of playlists" (click)="closeDialog(list)">
+      <div class="list_row">
+        <div class="title">{{list.name}}</div>
+        <div class="sub">{{list.length}} tracks - by {{list.owner}}</div>
+      </div>
+    </mat-list-item>
+  </ng-template>
 </mat-list>

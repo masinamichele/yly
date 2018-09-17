@@ -1,13 +1,6 @@
 <div *ngIf="userData">
   <div class="splitscreen">
     <div class="player_area flex_column">
-      <div class="user_card">
-        <img [src]="userData.images[0].url">
-        <div>Welcome, <div>{{userData.display_name}}</div>
-        </div>
-        <a (click)="logout()">(logout)</a>
-      </div>
-
       <div class="tab">
         Your library
         <div class="searchbox">
@@ -19,7 +12,16 @@
             </div>
           </div>
           <span>
-            <mat-icon>search</mat-icon>
+            <ng-container *ngIf="!searchBox.value; else btnDelete">
+              <button mat-icon-button [disableRipple]="true" style="cursor: default">
+                <mat-icon>search</mat-icon>
+              </button>
+            </ng-container>
+            <ng-template #btnDelete>
+              <button mat-icon-button (click)="searchBox.setValue('')">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </ng-template>
           </span>
         </div>
 
@@ -30,6 +32,9 @@
           <button mat-icon-button (click)="playTrack(track)">
             <mat-icon>play_arrow</mat-icon>
           </button> {{track.title}} - {{track.artist}}
+          <!-- <button class="right_btn" mat-icon-button (click)="handleQueue(track)" [class.inQueue]="isQueued(track)">
+            <mat-icon>{{isQueued(track) ? 'remove_from_queue' : 'add_to_queue'}}</mat-icon>
+          </button> -->
         </div>
         <div class="track_row">
           <ng-container *ngIf="nextLibrary; else noMore">
@@ -52,38 +57,59 @@
             matTooltipPosition="before">
             <mat-icon>{{hasSavedTrack ? 'check' : 'add'}}</mat-icon>
           </button>
+
           <button mat-mini-fab (click)="skipPrevious()">
             <mat-icon>skip_previous</mat-icon>
           </button>
+
           <button mat-fab (click)="playPause()">
             <mat-icon>{{isPlaying ? 'pause' : 'play_arrow'}}</mat-icon>
           </button>
+
           <button mat-mini-fab (click)="skipNext()">
             <mat-icon>skip_next</mat-icon>
           </button>
-          <button mat-mini-fab (click)="refresh()" matTooltip="Refresh" matTooltipPosition="after">
+
+          <!-- <button mat-mini-fab (click)="refresh()" matTooltip="Refresh" matTooltipPosition="after">
             <mat-icon>autorenew</mat-icon>
+          </button> -->
+
+          <button mat-mini-fab matTooltip="Open playlists" matTooltipPosition="above" [matBadge]="playlists.length"
+            [matBadgeHidden]="playlists.length < 1" matBadgeColor="accent" (click)="openPlaylists()">
+            <mat-icon>playlist_play</mat-icon>
           </button>
+
+          <!-- <button mat-mini-fab matTooltip="Queue" matTooltipPosition="above" [matBadge]="queue.length" [matBadgeHidden]="queue.length < 1"
+            matBadgeColor="accent" (click)="openQueue()">
+            <mat-icon>queue_music</mat-icon>
+          </button> -->
+        </div>
+        <div class="volume">
+          <mat-slider min="0" max="100" step="1" [formControl]="volumeSlider" tickInterval="10"></mat-slider>
         </div>
       </div>
     </div>
 
-    <div class="lyrics_area">
+    <div class="lyrics_area flex_column">
+      <div class="user_card">
+        <img [src]="userData.images[0] ? userData.images[0].url : 'https://i.imgur.com/jNNT4LE.png'">
+        <div>Welcome, <div>{{userData.display_name}}</div>
+          <div class="actions">
+            <a (click)="logout()">logout</a>
+            <a href="https://github.com/masinamichele/yly/issues">report a bug</a>
+          </div>
+        </div>
+      </div>
+
       <div class="lyrics" [innerHtml]="lyrics">
       </div>
+      <p>Lyrics by <a href='https://genius.com/' target='_blank'>Genius</a></p>
     </div>
-  </div>
-
-  <div class="abs">
-    <button mat-flat-button matTooltip="Open playlists" matTooltipPosition="above" [matBadge]="playlists.length"
-      matBadgeColor="accent" (click)="openPlaylists()">
-      <mat-icon>playlist_play</mat-icon>
-    </button>
   </div>
 
 </div>
 
-<button (click)="updateCurrent()" id="helper" style="visibility:hidden;position:absolute;top:0"></button>
+<button (click)="handleNextTrack()" id="helper" style="visibility:hidden;position:absolute;top:0"></button>
 <button (click)="updateDeviceID()" id="deviceid" style="visibility:hidden;position:absolute;top:0"></button>
 
 <div class="overlay" *ngIf="!device">

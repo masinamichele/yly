@@ -1,0 +1,15 @@
+<mat-list>
+
+  <ng-container *ngIf="queue.length < 1; else someQueue">
+    <div>Nothing in queue.</div>
+  </ng-container>
+
+  <ng-template #someQueue>
+    <mat-list-item *ngFor="let q of queue" (click)="closeDialog(q)">
+      <div class="list_row">
+        <div class="title">{{q.title}}</div>
+        <div class="sub">{{q.artist}}</div>
+      </div>
+    </mat-list-item>
+  </ng-template>
+</mat-list>

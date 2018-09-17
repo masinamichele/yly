@@ -84,6 +84,7 @@ button {
   text-align: center;
   color: $grey;
   font-weight: 300;
+  // animation: absanim 0.5s cubic-bezier(0.47, 0, 0.745, 0.715) 1.1s both;
 }
 
 .puff-in-center {
@@ -91,6 +92,13 @@ button {
 }
 .slide-in-top {
   animation: slide-in-top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s both;
+}
+.anim {
+  animation: anim 0.7s cubic-bezier(0.47, 0, 0.745, 0.715) 0.5s both;
+}
+
+* {
+  overflow: hidden !important;
 }
 
 @keyframes puff-in-center {
@@ -110,9 +118,36 @@ button {
   }
 }
 
+@keyframes anim {
+  0% {
+    -webkit-transform: scale(2);
+    transform: scale(1.1);
+    -webkit-filter: blur(2px);
+    filter: blur(2px);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    -webkit-filter: blur(0px);
+    filter: blur(0px);
+    opacity: 1;
+  }
+}
+
 @keyframes slide-in-top {
   0% {
     transform: translateY(-1000px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes absanim {
+  0% {
+    transform: translateY(20px);
     opacity: 0;
   }
   100% {

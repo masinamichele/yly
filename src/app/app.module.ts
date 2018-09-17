@@ -14,12 +14,16 @@ import { MatBadgeModule } from "@angular/material/badge";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatMenuModule } from "@angular/material/menu";
+import { MatDialogModule } from "@angular/material/dialog";
+import { MatSliderModule } from "@angular/material/slider";
 
 import { AppComponent } from "./app.component";
 import { LoginComponent } from "./login/login.component";
 import { PlayComponent } from "./play/play.component";
 import { PlaylistsComponent } from "./playlists/playlists.component";
 import { ReactiveFormsModule } from "@angular/forms";
+import { QueueComponent } from "./queue/queue.component";
+import { PremiumDialogComponent } from "./premium-dialog/premium-dialog.component";
 
 const appRoutes: Routes = [
   {
@@ -42,7 +46,9 @@ const appRoutes: Routes = [
     CallbackComponent,
     LoginComponent,
     PlayComponent,
-    PlaylistsComponent
+    PlaylistsComponent,
+    QueueComponent,
+    PremiumDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -58,10 +64,12 @@ const appRoutes: Routes = [
     MatBadgeModule,
     MatFormFieldModule,
     MatInputModule,
-    MatMenuModule
+    MatMenuModule,
+    MatDialogModule,
+    MatSliderModule
   ],
   providers: [],
   bootstrap: [AppComponent],
-  entryComponents: [PlaylistsComponent]
+  entryComponents: [PlaylistsComponent, QueueComponent, PremiumDialogComponent]
 })
 export class AppModule {}
