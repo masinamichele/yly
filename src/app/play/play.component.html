@@ -51,7 +51,9 @@
       </div>
 
       <div class="player">
-        <div class="current"><a [href]="currentUrl" target="_blank">{{currentTrack}}</a></div>
+        <div class="current" [style.background]="'linear-gradient(90deg, #2ecc7199 ' + percentage + '%, transparent 0)'">
+          <a [href]="currentUrl" target="_blank">{{currentTrack || '&nbsp;'}}</a>
+        </div>
         <div class="buttons">
           <button mat-mini-fab (click)="toggleSave()" [matTooltip]="hasSavedTrack ? 'Remove from library' : 'Add to library'"
             matTooltipPosition="before">
@@ -85,6 +87,7 @@
           </button> -->
         </div>
         <div class="volume">
+          <mat-icon>volume_up</mat-icon>
           <mat-slider min="0" max="100" step="1" [formControl]="volumeSlider" tickInterval="10"></mat-slider>
         </div>
       </div>
@@ -109,7 +112,7 @@
 
 </div>
 
-<button (click)="handleNextTrack()" id="helper" style="visibility:hidden;position:absolute;top:0"></button>
+<button (click)="updateCurrent()" id="helper" style="visibility:hidden;position:absolute;top:0"></button>
 <button (click)="updateDeviceID()" id="deviceid" style="visibility:hidden;position:absolute;top:0"></button>
 
 <div class="overlay" *ngIf="!device">

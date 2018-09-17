@@ -42,6 +42,11 @@ export class PlayComponent implements OnInit {
 
   volumeSlider = new FormControl();
 
+  duration: number;
+  progress: number;
+  percentage = 0;
+  interval;
+
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -56,6 +61,7 @@ export class PlayComponent implements OnInit {
 
   updateDeviceID() {
     this.device = localStorage.getItem("device");
+    this.getVolume();
   }
 
   ngOnInit() {
@@ -74,8 +80,6 @@ export class PlayComponent implements OnInit {
         this.updateCurrent();
       }, this.err.bind(this));
 
-    this.getVolume();
-
     this.searchBox.valueChanges
       .pipe(
         debounceTime(500),
@@ -93,7 +97,11 @@ export class PlayComponent implements OnInit {
 
   err(error) {
     console.error(error);
-    this.logout();
+    this.http
+      .put(this.apiUrl + "/player/pause", {}, { headers: this.headers })
+      .pipe()
+      .subscribe(_ => {}, console.error);
+    this.router.navigate(["/"]);
   }
 
   logout() {
@@ -113,7 +121,7 @@ export class PlayComponent implements OnInit {
         })
         .pipe()
         .subscribe(data => {
-          console.log(data);
+          // console.log(data);
           for (const track of data["tracks"].items) {
             this.searchResults.push({
               title: track.name,
@@ -137,7 +145,7 @@ export class PlayComponent implements OnInit {
   }
 
   setVolume(value) {
-    if (value) {
+    if (value && this.device !== undefined) {
       this.http
         .put(
           this.apiUrl +
@@ -179,7 +187,7 @@ export class PlayComponent implements OnInit {
   }
 
   playTrack(track) {
-    console.log(this.apiUrl + "/player/play?device_id=" + this.device);
+    // console.log(this.apiUrl + "/player/play?device_id=" + this.device);
     this.http
       .put(
         this.apiUrl + "/player/play?device_id=" + this.device,
@@ -315,6 +323,11 @@ export class PlayComponent implements OnInit {
       .pipe()
       .subscribe(_ => {
         this.updateCurrent();
+        if (this.isPlaying) {
+          clearInterval(this.interval);
+        } else {
+          this.handleProgress();
+        }
       }, this.err.bind(this));
   }
 
@@ -361,7 +374,7 @@ export class PlayComponent implements OnInit {
         })
         .pipe()
         .subscribe(data => {
-          console.log(data);
+          // console.log(data);
           if (data) {
             const currentTitle = data["item"].name;
             const currentArtists = data["item"].artists
@@ -376,6 +389,16 @@ export class PlayComponent implements OnInit {
             this.currentUrl = data["item"].external_urls.spotify;
             this.isPlaying = data["is_playing"];
             this.currentId = data["item"].id;
+            this.duration = data["item"].duration_ms;
+            this.progress = 0;
+            this.percentage = 0;
+            if (this.interval) {
+              clearInterval(this.interval);
+            }
+
+            if (this.isPlaying) {
+              this.handleProgress();
+            }
 
             this.http
               .get(this.apiUrl + "/tracks/contains?ids=" + this.currentId, {
@@ -392,6 +415,30 @@ export class PlayComponent implements OnInit {
     }, 500);
   }
 
+  progressHelper() {
+    this.getSongProgress();
+    this.percentage = Math.floor((this.progress / this.duration) * 100);
+    // console.log(this.duration, this.progress, this.percentage);
+  }
+
+  handleProgress() {
+    this.interval = setInterval(this.progressHelper.bind(this), 2000);
+  }
+
+  getSongProgress() {
+    this.http
+      .get(this.apiUrl + "/player/currently-playing", {
+        headers: this.headers
+      })
+      .pipe()
+      .subscribe(data => {
+        // console.log(data);
+        if (data) {
+          this.progress = data["progress_ms"];
+        }
+      }, this.err.bind(this));
+  }
+
   loadLyrics(title: string, artists: string) {
     this.lyrics = "Loading lyrics...";
     const query = encodeURI(
@@ -406,7 +453,7 @@ export class PlayComponent implements OnInit {
             artists.indexOf(",") < 0 ? artists.length : artists.indexOf(",")
           )
     );
-    console.log(query);
+    // console.log(query);
     this.http
       .get(
         "https://api.genius.com/search?q=" +
@@ -417,7 +464,7 @@ export class PlayComponent implements OnInit {
       .subscribe(data => {
         if (data["response"].hits.length > 0) {
           const url = data["response"].hits[0].result.url;
-          console.log(url);
+          // console.log(url);
 
           fetch("https://cors-anywhere.herokuapp.com/" + url)
             .then(res => res.text())
