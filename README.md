@@ -1,5 +1,7 @@
 # YLY - SpotifyLyrics
 
+## ⚠️ [UNMAINTAINED] The project is not in active development. I'm accepting PRs.
+
 A web interface to control your Spotify playback, together with lyrics.
 
 You can try at: [yly.herokuapp.com](https://yly.herokuapp.com/)
